@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>Working with Viktor and Eve: AdOps user guide</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f6f7f9; --surface:#ffffff; --ink:#16202e; --muted:#5a6676; --line:#dde2e9;
+  --accent:#1f4e8c; --accent-soft:#e6eef8; --warn:#a24a12; --warn-soft:#fbeee3;
+  --ok:#1d6b4a; --ok-soft:#e3f3ec; --code:#eef1f5;
+  color-scheme: light;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0f141b; --surface:#171e28; --ink:#e6eaf0; --muted:#9aa6b6; --line:#2a3443;
+    --accent:#7db0ee; --accent-soft:#1b2b42; --warn:#f0a56b; --warn-soft:#33241a;
+    --ok:#6fcfa3; --ok-soft:#18302a; --code:#202938;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0f141b; --surface:#171e28; --ink:#e6eaf0; --muted:#9aa6b6; --line:#2a3443;
+  --accent:#7db0ee; --accent-soft:#1b2b42; --warn:#f0a56b; --warn-soft:#33241a;
+  --ok:#6fcfa3; --ok-soft:#18302a; --code:#202938;
+  color-scheme: dark;
+}
+html{scroll-padding-top:calc(env(safe-area-inset-top,0px) + 70px)}
+*,*::before,*::after{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Instrument Sans",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;font-size:16px;line-height:1.6}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);background:var(--bg);z-index:30}
+a{color:var(--accent)}
+code,.mono{font-family:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;font-size:.86em;background:var(--code);padding:.1em .38em;border-radius:4px}
+.shell{display:grid;grid-template-columns:260px minmax(0,1fr);max-width:1240px;margin:0 auto}
+nav.toc{position:sticky;top:env(safe-area-inset-top,0px);align-self:start;height:calc(100vh - env(safe-area-inset-top,0px));overflow-y:auto;padding:28px 20px 40px 24px;border-right:1px solid var(--line)}
+nav.toc .title{font-weight:700;font-size:1.02rem;margin:0 0 14px;line-height:1.3}
+nav.toc a{display:block;color:var(--muted);text-decoration:none;padding:5px 0;font-size:.92rem}
+nav.toc a:hover,nav.toc a:focus-visible{color:var(--accent)}
+nav.toc .sub{padding-left:14px;font-size:.86rem}
+nav.toc .grp{margin-top:14px;font-weight:600;color:var(--ink);font-size:.9rem}
+main{padding:40px 40px 80px;min-width:0;max-width:860px}
+h1{font-size:2.15rem;line-height:1.15;margin:0 0 10px;letter-spacing:-.02em}
+h2{font-size:1.5rem;margin:56px 0 12px;padding-top:8px;letter-spacing:-.01em;line-height:1.25}
+h3{font-size:1.15rem;margin:34px 0 8px;line-height:1.3}
+h4{font-size:.98rem;margin:20px 0 6px}
+p{margin:0 0 12px;max-width:72ch}
+ul,ol{margin:0 0 14px;padding-left:22px;max-width:72ch}
+li{margin:4px 0}
+.lede{font-size:1.1rem;color:var(--muted);max-width:62ch}
+.meta{color:var(--muted);font-size:.88rem;margin-top:14px}
+.callout{border-left:4px solid var(--accent);background:var(--accent-soft);padding:12px 16px;border-radius:0 8px 8px 0;margin:16px 0;max-width:76ch}
+.callout.warn{border-color:var(--warn);background:var(--warn-soft)}
+.callout.ok{border-color:var(--ok);background:var(--ok-soft)}
+.callout p:last-child,.callout ul:last-child{margin-bottom:0}
+.callout strong:first-child{display:block;margin-bottom:2px}
+.tablewrap{overflow-x:auto;margin:14px 0 20px;border:1px solid var(--line);border-radius:10px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:.93rem;min-width:520px}
+th,td{text-align:left;padding:9px 13px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-weight:600;background:var(--code)}
+tr:last-child td{border-bottom:none}
+.wf{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:6px 22px 18px;margin:22px 0}
+.wf h3{margin-top:18px}
+.wf dl{margin:10px 0 0;display:grid;grid-template-columns:150px minmax(0,1fr);gap:10px 18px}
+.wf dt{font-weight:600;color:var(--muted);font-size:.9rem;padding-top:2px}
+.wf dd{margin:0}
+.wf dd ul{margin:0 0 6px}
+.flow{counter-reset:s;list-style:none;padding:0;margin:16px 0;max-width:none}
+.flow li{counter-increment:s;position:relative;padding:2px 0 14px 46px;margin:0;border-left:2px solid var(--line);margin-left:15px}
+.flow li::before{content:counter(s);position:absolute;left:-16px;top:0;width:30px;height:30px;border-radius:50%;background:var(--accent);color:var(--surface);font-weight:600;display:grid;place-items:center;font-size:.9rem}
+.flow li:last-child{border-left-color:transparent}
+.flow li b{display:block}
+.pill{display:inline-block;font-size:.78rem;font-weight:600;padding:1px 9px;border-radius:99px;background:var(--accent-soft);color:var(--accent);margin-right:4px;white-space:nowrap}
+.pill.warn{background:var(--warn-soft);color:var(--warn)}
+.pill.ok{background:var(--ok-soft);color:var(--ok)}
+.quote{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px 14px;margin:8px 0;max-width:72ch}
+.quote span{color:var(--muted);font-size:.85rem;display:block}
+footer{margin-top:60px;color:var(--muted);font-size:.88rem;border-top:1px solid var(--line);padding-top:16px}
+@media (max-width: 900px){
+  .shell{display:block}
+  nav.toc{position:static;height:auto;border-right:none;border-bottom:1px solid var(--line);padding:16px 18px}
+  nav.toc .links{display:flex;gap:4px 16px;flex-wrap:wrap}
+  nav.toc .grp,nav.toc .sub{display:none}
+  main{padding:26px 18px 70px}
+  .wf{padding:4px 16px 14px}
+  .wf dl{grid-template-columns:1fr;gap:2px}
+  .wf dt{margin-top:10px}
+  h1{font-size:1.75rem}
+}
+@media (prefers-reduced-motion: no-preference){ html{scroll-behavior:smooth} }
+</style>
+</head>
+<body>
+<div class="shell">
+<nav class="toc" aria-label="Contents">
+  <p class="title">Viktor and Eve user guide</p>
+  <div class="links">
+  <a href="#overview">1. What this is</a>
+  <a href="#flow">2. How a request flows</a>
+  <a href="#workflows">3. Workflows</a>
+  <a class="sub" href="#offer-create">Offer create</a>
+  <a class="sub" href="#offer-edit">Offer edit</a>
+  <a class="sub" href="#brand-import">Brand import</a>
+  <a class="sub" href="#brand-e2e">Brand end-to-end</a>
+  <a class="sub" href="#brand-removal">Brand removal</a>
+  <a class="sub" href="#pa-migration">Program account migration</a>
+  <a class="sub" href="#pa-inactivate">Inactivate program account</a>
+  <a class="sub" href="#feature-update">Bulk feature update</a>
+  <a class="sub" href="#feature-removal">Bulk feature removal</a>
+  <a href="#lookups">4. Looking things up</a>
+  <a href="#direct">5. Direct edits</a>
+  <a href="#content">6. Brand data for content</a>
+  <a href="#rules">7. Rules Viktor applies</a>
+  <a href="#troubleshooting">8. When something fails</a>
+  <a href="#glossary">9. Glossary</a>
+  <a href="#limits">10. Known limits</a>
+  <a href="#channels">11. Links and Slack channels</a>
+  <a href="https://eve.gdcgroup.tech/api-docs">Eve API docs (live)</a>
+  </div>
+</nav>
+
+<main>
+<h1>Working with Viktor and Eve</h1>
+<p class="lede">A practical guide for AdOps, Commercial and Content teams on what you can ask Viktor to do in Slack, what Viktor needs from you, and what happens in Eve afterwards.</p>
+<p class="meta">Based on the <a href="https://eve.gdcgroup.tech/api-docs">Eve API live docs</a> (specification v1.0.0) and the existing Eve API pages in Confluence. Last compiled 15 October 2026. The Slack wording in the examples is illustrative; the fields, rules and outcomes come from the API.</p>
+
+<h2 id="overview">1. What this is</h2>
+<p><strong>Eve</strong> is GDC's AdTech system of record: brands, offers, operator deals, destination URLs, program accounts and the site placements that connect them. <strong>Viktor</strong> is the Slack assistant that works with Eve on your behalf. You describe what you want in plain language using names (brand, site, country); Viktor finds the matching records, collects what's missing, and either saves the work for review or performs the change.</p>
+<p>Everything Viktor does goes through the Eve API, so anything Viktor can do is also attributed to <em>you</em> in Eve's audit trail, using your Slack email.</p>
+<div class="callout ok"><strong>Where to ask</strong><p>Workflow requests go in <code>#adops-workflow-agent</code>, database sync requests in <code>#ask-adtech</code>, and API create/read/update/delete requests in <code>#adtech</code>. Full details in <a href="#channels">section 11</a>.</p></div>
+
+<h3>Four kinds of request</h3>
+<div class="tablewrap"><table>
+<thead><tr><th>Kind</th><th>Example</th><th>Reviewed before it takes effect?</th></tr></thead>
+<tbody>
+<tr><td><strong>Workflow</strong></td><td>"Create a welcome offer for 10Bet on gambling.com, UK, casino."</td><td>Yes. Saved as a draft or sent to Jira for QA first.</td></tr>
+<tr><td><strong>Lookup</strong></td><td>"Which site offers exist for offer 39965?"</td><td>Not applicable. Read only.</td></tr>
+<tr><td><strong>Direct edit</strong></td><td>"Set the expiry of offers 201, 202, 203 to 31 Dec."</td><td><span class="pill warn">No</span> Applied immediately.</td></tr>
+<tr><td><strong>Brand data for content</strong></td><td>Viktor pulls current bonus, payment and licence data before writing a brand review.</td><td>Not applicable. Read only.</td></tr>
+</tbody></table></div>
+<div class="callout warn"><strong>Rule of thumb</strong><p>If a change touches live offers, deals or destination URLs, use a workflow so someone reviews it. Direct edits skip review. This is a recommendation, not an enforced rule; the API allows both.</p></div>
+
+<h2 id="flow">2. How a request flows</h2>
+<ol class="flow">
+<li><b>You ask in Slack</b>Use names, not IDs. "10Bet", "gambling.com", "United Kingdom", "Casino".</li>
+<li><b>Viktor resolves names to Eve records</b>It searches Eve for each name. If a name matches several records (for example "10Bet" and "10Bet AU"), Viktor asks which one you mean. Each search shows at most 10 results, so a very broad name needs narrowing.</li>
+<li><b>Viktor asks for what's missing</b>Each workflow has required inputs (see section 3). Viktor will not guess certain choices such as publish status or default flags; it asks every time.</li>
+<li><b>Viktor checks and confirms</b>For offers, it can run a non-blocking currency check against the GEO and show you a warning before anything is saved.</li>
+<li><b>You choose: draft or send to QA</b>See the table below.</li>
+<li><b>Review and approval in Eve</b>A person checks the workflow in Eve and approves it. Only then are the changes applied.</li>
+</ol>
+
+<h3>Draft or send to QA</h3>
+<div class="tablewrap"><table>
+<thead><tr><th></th><th>Draft (default)</th><th>Send to QA</th></tr></thead>
+<tbody>
+<tr><td>Saved in Eve AdOps queue</td><td>Yes, status <code>draft</code></td><td>Yes, status <code>pending_qa</code></td></tr>
+<tr><td>Jira ticket</td><td>No. A person still has to send it to Jira from the Eve UI.</td><td>Created immediately. Viktor gives you the ticket key.</td></tr>
+<tr><td>Use it when</td><td>You want to review in Eve first, or you're unsure about a value.</td><td>You've confirmed everything and want it in the QA queue now.</td></tr>
+</tbody></table></div>
+<div class="callout"><strong>Which Jira board</strong><p>Every workflow goes to either the <strong>US Commercial</strong> or the <strong>ROW Commercial</strong> board. Viktor asks which. The ticket prefix you get back depends on the workflow and board.</p></div>
+<div class="callout warn"><strong>Currently draft only</strong><p>Bulk feature update and bulk feature removal cannot be sent to QA yet, because their Jira issue type isn't configured. Viktor must use draft for these.</p></div>
+
+<h3>Who Viktor thinks you are</h3>
+<p>Viktor identifies you by your Slack email and never asks you for it. That email must belong to an Eve user. If it doesn't, every write fails with "No user found with the provided email." Ask the AdTech team to create or fix your Eve user.</p>
+
+<h2 id="workflows">3. Workflows</h2>
+<p>Nine workflows are available. Pick by what you are trying to change.</p>
+<div class="tablewrap"><table>
+<thead><tr><th>I want to…</th><th>Workflow</th></tr></thead>
+<tbody>
+<tr><td>Add a new offer for an existing brand</td><td><a href="#offer-create">Offer create</a></td></tr>
+<tr><td>Change existing offers, their URLs or deals</td><td><a href="#offer-edit">Offer edit</a></td></tr>
+<tr><td>Onboard a new brand from an operator onboarding form</td><td><a href="#brand-import">Brand import</a></td></tr>
+<tr><td>Onboard a new brand with no form</td><td><a href="#brand-e2e">Brand end-to-end</a></td></tr>
+<tr><td>Take a brand off sites (hide or delete)</td><td><a href="#brand-removal">Brand removal</a></td></tr>
+<tr><td>Move operator deals from one program account to another</td><td><a href="#pa-migration">Program account migration</a></td></tr>
+<tr><td>Retire program accounts</td><td><a href="#pa-inactivate">Inactivate program account</a></td></tr>
+<tr><td>Add payment providers or licences to many brands, or features to many brand products</td><td><a href="#feature-update">Bulk feature update</a></td></tr>
+<tr><td>Remove licences from many brands, or features from many brand products</td><td><a href="#feature-removal">Bulk feature removal</a></td></tr>
+</tbody></table></div>
+
+<h3>Operator deal fields by deal type</h3>
+<p>Offer create, offer edit, brand import and brand end-to-end all take operator deal terms. Which numbers are required depends on the deal type.</p>
+<div class="tablewrap"><table>
+<thead><tr><th>Deal type ID</th><th>Required fields</th></tr></thead>
+<tbody>
+<tr><td>1</td><td>CPA amount, CPA trigger</td></tr>
+<tr><td>2</td><td>Rev share</td></tr>
+<tr><td>3</td><td>CPA amount, rev share, CPA trigger</td></tr>
+<tr><td>5</td><td>Handle share percentage</td></tr>
+<tr><td>7</td><td>CPA trigger</td></tr>
+</tbody></table></div>
+<p>Every deal also needs a settlement currency, a program account and a start date. <strong>Settlement currency</strong> (how the affiliate commission is paid) is separate from <strong>offer currency</strong> (what players see). Viktor asks for both.</p>
+
+<!-- OFFER CREATE -->
+<div class="wf" id="offer-create">
+<h3>Offer create</h3>
+<p>Creates a new offer for an existing brand, plus its site offers, destination URLs (SDURLs) and operator deals, across every combination of site, product, country and language you select.</p>
+<dl>
+<dt>Use it when</dt><dd>A brand is already in Eve and you're launching a new bonus or promotion.</dd>
+<dt>Have ready</dt><dd><ul>
+<li>Brand, product types, sites, countries (and regions where a country has them)</li>
+<li>Offer type, offer currency, start date, optional end date</li>
+<li>Offer description and terms and conditions</li>
+<li>Destination URL(s), or the existing SDURL(s) to reuse</li>
+<li>Deal terms (see the table above) or the existing deal(s) to reuse</li>
+</ul></dd>
+<dt>Viktor always asks</dt><dd><ul>
+<li><strong>Traffic source:</strong> one source or several. Several sources create one offer per source, and each source needs its own destination URLs.</li>
+<li><strong>Offer currency</strong>, even if it seems obvious. Viktor checks it against each country's expected currency and warns if it differs, or if the description contains a different currency symbol.</li>
+<li><strong>Default site offer?</strong> Whether these site offers become the default for their site, country and region.</li>
+<li><strong>Publish?</strong> Whether the offer and its parent records go live once approved.</li>
+<li><strong>Default URL?</strong> For each destination URL. At most one per submission can be the default.</li>
+<li><strong>Language</strong>, for every site and country pair that has languages. You can't skip it.</li>
+</ul></dd>
+<dt>Choices you make</dt><dd><ul>
+<li>URLs: create new, or reuse existing. Scope: one generic URL set, or per region.</li>
+<li>Deals: create new or reuse existing. Scope: same for all, per site-brand-product, or per site-brand-product and region.</li>
+<li>Limit the combinations: if you don't want the full cross-join of sites, products, countries and languages, tell Viktor which to include.</li>
+</ul></dd>
+<dt>Description text</dt><dd>By default HTML is stripped and any site-specific description automation is applied. Say so if you need your HTML kept exactly as written.</dd>
+<dt>Result</dt><dd>A workflow titled like "Offer Create &gt; 10Bet &gt; gambling.com", with a link to it in Eve and, if sent to QA, a Jira key.</dd>
+</dl>
+</div>
+
+<!-- OFFER EDIT -->
+<div class="wf" id="offer-edit">
+<h3>Offer edit</h3>
+<p>Changes existing offers, their destination URLs and their operator deals. You only supply what changes; everything else stays as it is.</p>
+<dl>
+<dt>Use it when</dt><dd>Bonus terms, dates, URLs or deal rates change on live offers.</dd>
+<dt>How Viktor finds offers</dt><dd>By name, optionally narrowed by brand, site, country, region, or "only offers that have a default site offer". Viktor then lists the site offers under each offer so you can target specific ones.</dd>
+<dt>You can change</dt><dd><ul>
+<li>Offer type, currency, start and end date, description, terms and conditions, default flag</li>
+<li>Destination URLs: add new ones, or edit existing ones per site offer</li>
+<li>Operator deals: add new ones, or edit existing ones per site offer</li>
+</ul></dd>
+<dt>Heads-up</dt><dd><ul>
+<li><strong>Publish is one-way.</strong> You can publish through an edit, but never unpublish. To take something offline, use <a href="#brand-removal">Brand removal</a>.</li>
+<li>When editing an existing deal, send only the changed numbers. The start date is optional and keeps its current value if omitted.</li>
+<li>Currency changes get the same GEO mismatch warning as offer create.</li>
+</ul></dd>
+</dl>
+</div>
+
+<!-- BRAND IMPORT -->
+<div class="wf" id="brand-import">
+<h3>Brand import</h3>
+<p>Creates a new brand from the operator's onboarding form (CSV or Excel), and registers it on the sites and countries you choose. Optionally creates its first offer at the same time.</p>
+<dl>
+<dt>Use it when</dt><dd>You have the operator's completed onboarding form. No form? Use <a href="#brand-e2e">Brand end-to-end</a>.</dd>
+<dt>Have ready</dt><dd><ul>
+<li>The file, with two columns named <strong>Question</strong> and <strong>Responses</strong>. CSV, XLSX and XLS are accepted.</li>
+<li>Affiliate program, sites, countries, regions (if any country has them), languages</li>
+</ul></dd>
+<dt>One file at a time</dt><dd>Each submission takes one file. For several brands, Viktor submits one workflow per file.</dd>
+<dt>Constraints</dt><dd><ul>
+<li>Each site and country pair must already exist in Eve as a site country version.</li>
+<li>You can't mix countries that have regions with countries that don't. Split them into two imports.</li>
+<li>Regions are required when any selected country has regions, and they must belong to the selected countries.</li>
+<li>Languages are required whenever the site and country pair has any.</li>
+</ul></dd>
+<dt>Optional offer</dt><dd>Viktor asks every time whether to create an offer. If yes, it needs offer type, currency, start date, description, new destination URLs and new deals. Reusing existing URLs or deals isn't available here.</dd>
+<dt>If the file fails</dt><dd>Viktor relays the parse error, for example "Row 3: missing required column 'Responses'". Fix the file and resubmit.</dd>
+</dl>
+</div>
+
+<!-- BRAND E2E -->
+<div class="wf" id="brand-e2e">
+<h3>Brand end-to-end</h3>
+<p>Sets up a brand from scratch without a form: the brand, its products, site placements, offer, site offers, destination URLs and operator deals in one workflow.</p>
+<dl>
+<dt>Have ready</dt><dd><ul>
+<li>Brand name, which must be unique across all existing brands. A duplicate is rejected. Optional established year.</li>
+<li>Affiliate program, products, sites, countries, regions and languages</li>
+<li>Offer details, URLs and deal terms</li>
+</ul></dd>
+<dt>One product or several</dt><dd>With one product, Viktor collects a single offer. With two or more, it collects a separate offer for each product (type, currency, dates, description, terms, default flag).</dd>
+<dt>Always new</dt><dd>URLs are always created new and deals always created new. Every URL and deal entry carries a language.</dd>
+</dl>
+</div>
+
+<!-- BRAND REMOVAL -->
+<div class="wf" id="brand-removal">
+<h3>Brand removal</h3>
+<p>Removes a brand from selected site, country and product placements, either by hiding it or by deleting the placements.</p>
+<dl>
+<dt>Have ready</dt><dd>The brand, the placements to act on (each is one site, country and product combination for that brand), optional product-type filter, and a reason. The reason goes into the Jira ticket.</dd>
+<dt>Soft or full</dt><dd>
+<div class="tablewrap"><table>
+<thead><tr><th></th><th>Soft</th><th>Full</th></tr></thead>
+<tbody>
+<tr><td>What happens</td><td>Hides the call-to-action and can mark as cross-sell on the placements</td><td>Soft-deletes site offers, regional placements and placements</td></tr>
+<tr><td>Unpublish option</td><td>On by default. Also unpublishes placements, the parent site brand and related site offers.</td><td>Ignored</td></tr>
+<tr><td>Cross-sell option</td><td>Off by default</td><td>Ignored</td></tr>
+<tr><td>Parent site brand</td><td>Not hidden by the CTA setting</td><td>Deleted only if <em>all</em> its placements are selected</td></tr>
+</tbody></table></div></dd>
+</dl>
+<div class="callout warn"><strong>Pick soft unless you must delete</strong><p>Soft keeps the data and can be reversed. Full removal is a delete, and this API has no restore.</p></div>
+</div>
+
+<!-- PA MIGRATION -->
+<div class="wf" id="pa-migration">
+<h3>Program account migration</h3>
+<p>Moves all operator deals from one or more source program accounts to a single target program account, and marks each source as <strong>Migrated</strong>.</p>
+<dl>
+<dt>Have ready</dt><dd>Source account(s), the target account, and a comment explaining why. The comment appears in the Jira ticket and is stored permanently with the migration record.</dd>
+<dt>Rules</dt><dd><ul>
+<li>The target can't also be a source.</li>
+<li>Accounts already marked Migrated can't be a source or a target. They don't appear in search.</li>
+</ul></dd>
+<dt>Heads-up</dt><dd>Approval moves every deal on the source accounts. Check the source list carefully before sending to QA.</dd>
+</dl>
+</div>
+
+<!-- PA INACTIVATE -->
+<div class="wf" id="pa-inactivate">
+<h3>Inactivate program account</h3>
+<p>Requests that one or more program accounts be set to <strong>Inactive</strong>.</p>
+<dl>
+<dt>Have ready</dt><dd>The accounts, and one shared reason. The reason goes into the Jira ticket, the Revenue Accounting Slack notification and each account's status log.</dd>
+<dt>Approval-gated</dt><dd>Submitting does <strong>not</strong> change any account. A Revenue Accounting approver must confirm the request in Eve first.</dd>
+<dt>Rules</dt><dd>Already-inactive accounts don't appear in search and can't be selected.</dd>
+</dl>
+</div>
+
+<!-- BULK FEATURE UPDATE -->
+<div class="wf" id="feature-update">
+<h3>Bulk feature update</h3>
+<p>Adds features to many records at once. It has two independent sections, and you can use one or both in the same request.</p>
+<dl>
+<dt>Brand section</dt><dd>Attach one or more <strong>payment providers</strong> or <strong>licence jurisdictions</strong> to one or more brands. For payment providers you can also set country, regions, language, and whether deposits and withdrawals are allowed. These extra fields are only valid for payment providers.</dd>
+<dt>Brand product section</dt><dd>Attach one or more product features (for example a software provider) to one or more brand products.</dd>
+<dt>Rules</dt><dd><ul>
+<li>Regions require a country, and every region must belong to it.</li>
+<li>One country and one language apply to every payment provider in the request. For different countries, make separate requests.</li>
+<li>Every feature key must match the chosen type. Attaching a licence where a payment provider was selected is rejected.</li>
+<li>Duplicate IDs in a list are rejected.</li>
+</ul></dd>
+<dt>On approval</dt><dd>Best effort per record: something already attached is skipped, not treated as an error.</dd>
+<dt>Status</dt><dd><span class="pill warn">Draft only for now</span></dd>
+</dl>
+</div>
+
+<!-- BULK FEATURE REMOVAL -->
+<div class="wf" id="feature-removal">
+<h3>Bulk feature removal</h3>
+<p>The reverse of bulk feature update, but it handles one scope per request.</p>
+<dl>
+<dt>Choose one scope</dt><dd><ul>
+<li><strong>Licence jurisdiction:</strong> remove licences from brands.</li>
+<li><strong>Product feature:</strong> remove features from brand products.</li>
+</ul>Sending fields for both scopes is rejected. Payment providers aren't covered by this workflow.</dd>
+<dt>On approval</dt><dd>Best effort per pair. If a brand doesn't have that licence, or a product doesn't have that feature, it is skipped.</dd>
+<dt>Status</dt><dd><span class="pill warn">Draft only for now</span></dd>
+</dl>
+</div>
+
+<h2 id="lookups">4. Looking things up</h2>
+<p>You can ask Viktor to find records any time. These are read-only and take effect on nothing.</p>
+
+<h3>Quick lookups</h3>
+<p>These return a name and ID, up to 10 matches. If there are more, Viktor tells you the total so you can narrow the search.</p>
+<div class="tablewrap"><table>
+<thead><tr><th>You can find</th><th>Tips</th></tr></thead>
+<tbody>
+<tr><td>Brands, brand products, sites, product types, offer types, offers, affiliate programs, program accounts, operator deals, countries, currencies, offer sources</td><td>Partial names work.</td></tr>
+<tr><td>Languages</td><td>Give a site and country together to see only languages valid for that combination.</td></tr>
+<tr><td>Country regions</td><td>Search by two-letter code (for example AL). Searching by full name needs the country as well. Results show the code, not the full name.</td></tr>
+<tr><td>Site country versions</td><td>Labels look like "Gambling.com &gt; English &gt; United Kingdom" and are hard to guess. Filter by site and country instead of typing a label.</td></tr>
+<tr><td>Site brand products</td><td>Filter by site, country, brand, product type or region instead of typing a label.</td></tr>
+<tr><td>Site offers</td><td>Give the offer to list every published site offer under it.</td></tr>
+</tbody></table></div>
+
+<h3>Browsing records in detail</h3>
+<p>For fuller records, Viktor can list any of the Eve resources below. Results are paged (15 by default, up to 100), can be sorted, and can be filtered. Examples: offers for a brand product, brands by affiliate program, brand features for a brand and country, operator deals by program account. The full list of filters for each resource is in the <a href="https://eve.gdcgroup.tech/api-docs">Eve API docs</a>.</p>
+<div class="tablewrap"><table>
+<thead><tr><th>Area</th><th>Resources</th></tr></thead>
+<tbody>
+<tr><td>Commercial</td><td>Affiliate programs, program accounts, operator deals, adge agents</td></tr>
+<tr><td>Brands</td><td>Brands, brand products, brand terms, brand features, brand feature keys, attributes, attribute types, USPs</td></tr>
+<tr><td>Site placements</td><td>Site brands, site brand products, regional site brands and products, site country versions, site languages</td></tr>
+<tr><td>Offers and links</td><td>Offers, site offers, destination URLs (SDURLs)</td></tr>
+<tr><td>Reference data</td><td>Countries, country regions, languages, currencies, software, slot themes, product features, structural overrides</td></tr>
+<tr><td>Pages</td><td>Partnership pages, rankings</td></tr>
+</tbody></table></div>
+<p><strong>Read-only resources:</strong> adge agents (managed in the Adge UI), countries, country regions, site country versions, site languages, languages, currencies and software. These can be looked up but not changed through Viktor.</p>
+<div class="callout"><strong>Deleted records still show up</strong><p>Opening a record by ID returns it even if it was soft-deleted, with a deleted date shown. Listing can include or exclude deleted records on request.</p></div>
+
+<h2 id="direct">5. Direct edits</h2>
+<p>Besides workflows, Viktor can create, update and delete individual records. These happen <strong>immediately</strong> and appear in Eve's audit trail under your name.</p>
+<div class="callout warn"><strong>No review step</strong><p>Direct edits have no draft, no QA and no approval. Check the record IDs and values before you tell Viktor to go ahead.</p></div>
+<p>The exact fields each resource accepts are listed in the <a href="https://eve.gdcgroup.tech/api-docs">Eve API docs</a> under Resources.</p>
+<h3>What you can do</h3>
+<ul>
+<li><strong>Create or update</strong> any writable resource. Send only the fields you're changing when updating.</li>
+<li><strong>Delete</strong> means soft delete: the record is marked deleted, never erased. This API has no restore, so recovery needs the AdTech team.</li>
+<li><strong>Bulk update offers:</strong> apply one change (for example a new expiry date) to many offers at once, in a single all-or-nothing operation.</li>
+<li><strong>Attach or detach related records:</strong>
+  <ul>
+  <li>Product features on brand products</li>
+  <li>Licence jurisdictions on brands, for one brand or many at once. A bulk attach is all-or-nothing: if one brand rejects it, none are changed.</li>
+  </ul></li>
+<li><strong>Brand payment providers</strong> are managed as brand features (type "Localised Payment Provider") for a specific country, not as a relation on the brand. Viktor first checks whether the brand already has that provider for that country before adding it.</li>
+</ul>
+<h3>What Viktor typically checks first</h3>
+<ul>
+<li>The exact record, by ID, so you are not changing a similarly named one</li>
+<li>For attributes, the valid attribute types</li>
+<li>For attaching features, that the feature's type matches the relation (a licence can't be attached as a payment provider)</li>
+</ul>
+
+<h2 id="content">6. Brand data for content</h2>
+<p>Separately from AdOps requests, Viktor reads live commercial data from Eve before generating brand reviews, so that Eve is the source of truth for bonus amounts, payment methods and licences.</p>
+<div class="tablewrap"><table>
+<thead><tr><th>Data</th><th>What it contains</th></tr></thead>
+<tbody>
+<tr><td>Brand detail</td><td>Name, website, colour, logo, established year, owner, address, support contact</td></tr>
+<tr><td>Licences</td><td>Licensing jurisdictions and the country for each. Empty list if none on record.</td></tr>
+<tr><td>Payment methods</td><td>Global and country/state-specific methods, deposit and withdrawal support, times, limits and fees. Filterable by country and region.</td></tr>
+<tr><td>Product attributes</td><td>Attributes for a brand product, filterable by country and region</td></tr>
+<tr><td>Offers</td><td>Welcome offer details: type, description, size, percent, free spins, wagering, minimum deposit, promo code, expiry, terms, call-to-action link</td></tr>
+<tr><td>Regions</td><td>Which states or regions a product is mapped to, and whether each is published</td></tr>
+<tr><td>USPs</td><td>Selling points, resolved from the most specific scope: region first, then country, then general</td></tr>
+<tr><td>Destination URLs</td><td>Tracking links in all variants (desktop, mobile, PPC, deeplinks)</td></tr>
+<tr><td>Regional placements</td><td>All regional placements for a site country version, including unpublished</td></tr>
+</tbody></table></div>
+<div class="callout"><strong>Things to know</strong><ul>
+<li>Publish status is not filtered. Records come back whether live or not, so Viktor checks publish and expiry fields before using them.</li>
+<li>Links keep their <code>{{tracker}}</code> placeholder. It's filled in by the site at display time.</li>
+<li>If Eve data looks wrong, the fix belongs in Eve (ask AdOps), not in the content.</li>
+<li>Eve covers commercial data only. Editorial content, awards and video aren't in Eve.</li>
+</ul></div>
+
+<h2 id="rules">7. Rules Viktor applies</h2>
+<ul>
+<li><strong>Viktor never guesses</strong> publish status, default site offer, default URL, the traffic source count, or the offer currency. It asks every time.</li>
+<li><strong>Offer currency is not deal currency.</strong> One is shown to players, the other is how commission is paid.</li>
+<li><strong>Currency warnings don't block.</strong> The workflow still saves; the warning is there so you can correct before sending to QA.</li>
+<li><strong>Languages are mandatory</strong> where a site and country pair has any, even if you already said "English". Viktor resolves the ID.</li>
+<li><strong>Regions are all-or-nothing</strong> per request: don't mix countries with and without regions.</li>
+<li><strong>Edits can't unpublish.</strong> Only removal workflows take things offline.</li>
+<li><strong>Nothing is hard-deleted.</strong> All deletes are soft deletes.</li>
+<li><strong>Everything is attributed to you.</strong> Your Slack email is recorded as the actor.</li>
+</ul>
+
+<h2 id="troubleshooting">8. When something fails</h2>
+<div class="tablewrap"><table>
+<thead><tr><th>What you'll see</th><th>Meaning</th><th>What to do</th></tr></thead>
+<tbody>
+<tr><td>No user found with the provided email</td><td>Your Slack email doesn't match an Eve user.</td><td>Ask AdTech to create or correct your Eve user.</td></tr>
+<tr><td>A required field is missing</td><td>Viktor submitted without a required input.</td><td>Supply the value Viktor names.</td></tr>
+<tr><td>Languages required</td><td>That site and country pair has languages and none were given.</td><td>Choose the language(s) Viktor lists.</td></tr>
+<tr><td>Brand name already taken</td><td>Brand end-to-end requires a unique name.</td><td>Check whether the brand exists. Use offer create if it does.</td></tr>
+<tr><td>Already migrated, or already inactive</td><td>The account is in a final state.</td><td>Choose a different account.</td></tr>
+<tr><td>Target can't also be a source</td><td>The same account is on both sides of a migration.</td><td>Remove it from one side.</td></tr>
+<tr><td>Submitting to Jira is not yet available</td><td>Bulk feature workflows are draft only.</td><td>Save as draft.</td></tr>
+<tr><td>Regions don't belong to the selected countries</td><td>A region and country mismatch.</td><td>Correct the region or the country.</td></tr>
+<tr><td>Fields prohibited for this scope</td><td>Payment-provider fields sent for a licence, or fields from both removal scopes.</td><td>Keep to one scope.</td></tr>
+<tr><td>File parse error (brand import)</td><td>The onboarding file has a structural problem, for example a missing column.</td><td>Fix the file and resubmit.</td></tr>
+<tr><td>Resource not found</td><td>The record doesn't exist or the ID is wrong.</td><td>Ask Viktor to search again.</td></tr>
+<tr><td>Filter not allowed</td><td>That filter doesn't exist for that resource.</td><td>Ask Viktor to list the filters available.</td></tr>
+<tr><td>Too many requests</td><td>Rate limit of 250 requests a minute per IP exceeded.</td><td>Wait a minute and retry.</td></tr>
+<tr><td>Request blocked before reaching Eve</td><td>Network-level access (Cloudflare) rejected the call.</td><td>Contact AdTech or infrastructure.</td></tr>
+</tbody></table></div>
+
+<p>For field-level validation rules and example requests and responses for every workflow, see the <a href="https://eve.gdcgroup.tech/api-docs">Eve API docs</a>.</p>
+
+<h2 id="glossary">9. Glossary</h2>
+<div class="tablewrap"><table>
+<thead><tr><th>Term</th><th>Meaning</th></tr></thead>
+<tbody>
+<tr><td>Brand</td><td>An operator, for example Bet365.</td></tr>
+<tr><td>Brand product</td><td>A product line under a brand, for example Casino or Sports.</td></tr>
+<tr><td>Site brand product (SBP)</td><td>A brand product placed on a specific site, country and language.</td></tr>
+<tr><td>Regional site brand product (CRSBP)</td><td>The per-state or per-region settings of an SBP.</td></tr>
+<tr><td>Site country version (SCV)</td><td>A site's configuration for one country and language, for example Gambling.com in English for the UK.</td></tr>
+<tr><td>Offer</td><td>The bonus or promotion itself.</td></tr>
+<tr><td>Site offer</td><td>An offer as it appears on one site placement.</td></tr>
+<tr><td>SDURL</td><td>Site destination URL: the tracked link a button sends the player to.</td></tr>
+<tr><td>Operator deal</td><td>The commercial terms with the operator (CPA, rev share and so on) behind a placement.</td></tr>
+<tr><td>Program account</td><td>The affiliate account at the operator that earns the commission.</td></tr>
+<tr><td>Affiliate program</td><td>The operator's affiliate programme, which can have several program accounts.</td></tr>
+<tr><td>Offer source</td><td>The traffic source an offer is created for.</td></tr>
+<tr><td>Feature key</td><td>A catalogue entry such as "PayPal" (payment provider) or "Malta Gaming Authority" (licence jurisdiction).</td></tr>
+<tr><td>GEO</td><td>Country.</td></tr>
+<tr><td>Draft</td><td>Workflow saved in Eve, no Jira ticket yet.</td></tr>
+<tr><td>Pending QA</td><td>Workflow saved with a Jira ticket, awaiting review.</td></tr>
+<tr><td>Soft delete</td><td>Marks a record as deleted but keeps it in the database.</td></tr>
+</tbody></table></div>
+
+<h2 id="limits">10. Known limits</h2>
+<ul>
+<li>Bulk feature update and removal can only be saved as drafts for now.</li>
+<li>Offer edit cannot unpublish.</li>
+<li>No API restore for soft-deleted records.</li>
+<li>Brand import takes one file per request.</li>
+<li>Bulk feature removal doesn't cover payment providers.</li>
+<li>Payment-provider country and language apply once per bulk feature update request.</li>
+<li>Production base URL and support contact: ask the AdTech team. The API reference is at <a href="https://eve.gdcgroup.tech/api-docs">eve.gdcgroup.tech/api-docs</a>.</li>
+</ul>
+
+<h2 id="channels">11. Links and Slack channels</h2>
+<h3>Slack channels</h3>
+<p>Post in the channel that matches your request type, so it reaches the right people and Viktor picks it up in the right context.</p>
+<div class="tablewrap"><table>
+<thead><tr><th>Channel</th><th>Use it for</th><th>Typical requests</th></tr></thead>
+<tbody>
+<tr><td><code>#adops-workflow-agent</code></td><td><strong>Anything workflow related</strong></td><td>Offer create and edit, brand import and end-to-end, brand removal, program account migration and inactivation, bulk feature update and removal (see <a href="#workflows">section 3</a>)</td></tr>
+<tr><td><code>#ask-adtech</code></td><td><strong>Database sync requests</strong></td><td>Asking the AdTech team to sync data, for example when reference data in Eve looks out of date or doesn't match another system</td></tr>
+<tr><td><code>#adtech</code></td><td><strong>API create, read, update and delete requests</strong></td><td>Lookups, direct edits, bulk offer updates and attaching or detaching related records (see <a href="#lookups">section 4</a> and <a href="#direct">section 5</a>)</td></tr>
+</tbody></table></div>
+<div class="callout"><strong>Not sure which channel?</strong><p>If the change needs review before it takes effect, it's a workflow: use <code>#adops-workflow-agent</code>. If it's an immediate single-record read or change, use <code>#adtech</code>. If data needs syncing, use <code>#ask-adtech</code>.</p></div>
+
+<h3>Documentation and links</h3>
+<div class="tablewrap"><table>
+<thead><tr><th>Resource</th><th>What it's for</th></tr></thead>
+<tbody>
+<tr><td><a href="https://eve.gdcgroup.tech/api-docs"><strong>Eve API live docs</strong></a></td><td>The full technical reference: every workflow, lookup and resource, with required fields, validation rules and example requests and responses</td></tr>
+<tr><td><a href="https://gdcgroup.atlassian.net/wiki/spaces/Adtech/pages/6657016401/Eve-api+v1">Eve-api/v1 (Confluence, AdTech)</a></td><td>How the generic create, read, update and delete API is built, with the list of resources, filters and relations</td></tr>
+<tr><td><a href="https://gdcgroup.atlassian.net/wiki/spaces/Adtech/pages/6600622267/Eve+API+How+to+Connect+to+It">Eve API: How to connect to it (Confluence, AdTech)</a></td><td>Connection and access setup for developers and tool builders</td></tr>
+<tr><td><a href="https://gdcgroup.atlassian.net/wiki/spaces/DARC/pages/6633622438/Page+10+Eve+API+Integration">Page 10: Eve API Integration (Confluence, DARC)</a></td><td>How Viktor uses Eve data when generating brand reviews</td></tr>
+</tbody></table></div>
+<p>For access problems, a missing Eve user, or anything not covered here, ask in <code>#ask-adtech</code>.</p>
+
+<footer>Source: Eve API specification v1.0.0 (GDC Group AdTech team) and the Confluence pages "Eve-api/v1" and "Page 10: Eve API Integration".</footer>
+</main>
+</div>
+</body>
+</html>
